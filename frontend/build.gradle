@@ -1,0 +1,28 @@
+plugins {
+    id "org.openapi.generator" version "4.3.0"
+}
+configurations {
+  openapi {
+    canBeConsumed = false
+    canBeResolved = true
+  }
+}
+dependencies {
+  openapi(project(path: ":backend:app", configuration: 'openapi'))
+}
+
+ext {
+//    generator = "typescript-angular"
+//    clientOutputDir = file("$projectDir/src/client")
+    generator = "typescript-axios"
+    clientOutputDir = file("$projectDir/src/client-axios")
+}
+openApiGenerate {
+    generatorName = generator
+    outputDir = clientOutputDir.path
+    inputSpec = configurations.openapi.singleFile.path
+}
+tasks.named("openApiGenerate"){
+    inputs.files configurations.openapi
+    outputs.dir clientOutputDir
+}

@@ -1,0 +1,4 @@
+cookiecutter gh:muraig/full-stack-fastapi-postgresql
+npm --version && node --version
+6.4.1
+v10.15.3

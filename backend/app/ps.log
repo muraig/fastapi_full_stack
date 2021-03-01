@@ -1,0 +1,7 @@
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  2.0  0.2  26772 19992 ?        Ss   12:05   0:26 /usr/local/bin/python /usr/local/bin/uvicorn --reload --host 0.0.0.0 --port 80 --log-level info app.main:app
+root          14  0.0  0.1  13192 10828 ?        S    12:05   0:00 /usr/local/bin/python -c from multiprocessing.resource_tracker import main;main(4)
+root          39  0.5  1.2 352252 96928 ?        Sl   12:19   0:02 /usr/local/bin/python -c from multiprocessing.spawn import spawn_main; spawn_main(tracker_fd=5, pipe_handle=7) --multiprocessing-fork
+root          96  0.7  0.0   2388   756 pts/0    Ss   12:25   0:00 sh
+root         102  0.0  0.0   5752  3624 pts/0    S    12:25   0:00 bash
+root         106  0.0  0.0   9392  3036 pts/0    R+   12:26   0:00 ps aux

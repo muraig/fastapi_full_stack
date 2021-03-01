@@ -1,0 +1,31 @@
+
+ext {
+    openapiJSONSpec = file("$buildDir/openapi/backend.spec.json")
+}
+
+tasks.register("exportOpenAPISpec", Exec) {
+//    commandLine = ["poetry", "run", "python", "-c", """import json ; import sys ; from app.app import app ; json.dump(app.openapi(),sys.stdout)""".stripIndent()]
+    commandLine = ["poetry", "run", "python", "-c", """import json ; import sys ; from app.main import app ; json.dump(app.openapi(),sys.stdout)""".stripIndent()]
+
+    openapiJSONSpec.parentFile.mkdirs()//otherwise FileOutputStream throws
+    doFirst{
+        standardOutput = new FileOutputStream(openapiJSONSpec)
+    }
+
+    inputs.dir file("app")
+    outputs.file openapiJSONSpec
+}
+
+// see https://docs.gradle.org/current/userguide/cross_project_publications.html
+configurations {
+    openapi {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+}
+
+artifacts {
+    openapi(openapiJSONSpec){
+        builtBy(exportOpenAPISpec)
+    }
+}

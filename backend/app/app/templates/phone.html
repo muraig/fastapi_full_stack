@@ -1,0 +1,133 @@
+<!--
+  ~ Copyright (c) 2021.
+  ~ Projects from AndreyM
+  ~ The best encoder in the world!
+  ~ email: muraig@ya.ru
+  -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample Form</title>
+    <link href="/static/apple.css" rel="stylesheet">
+    <!--    <script src="/static/js/form.js" type="text/javascript"></script> -->
+</head>
+<body>
+<!--
+{
+  "items": [
+    {
+      "item_id": "phone"
+    },
+    {
+      "item_id": "typeautodial"
+    }
+  ],
+  "q": "4003"
+}
+
+{
+  "q": [
+    "4003"
+  ]
+}
+-->
+<h1>Осуществить вызов</h1>
+
+<form id="data" method="post">
+    <input autocomplete="on" autofocus form="data" name="phone" placeholder="НомерТелефона" type="number"
+           value="{{ phone }}"/>
+    <input autocomplete="on" form="data" name="typeautodial" placeholder="ТипОбзвона" type="text"
+           value="{{ typeautodial }}"/>
+    <input type="submit" value="НабратьНомер">
+    <!--
+    <input type="button" value="Кнопка" onclick="alert('Вы нажали кнопку!')" name="btn">
+     -->
+</form>
+
+<!-- <form method="post">
+    <input type="number" name="phone" value="1234"/>
+    <input type="submit">
+</form> -->
+
+<!--<p>Result: {# result #}</p> -->
+
+<div class="bordered" id="channel" style="">
+    <div class="bordered" id="descr">
+        <!--<h1>Application ID: {{ appl_id }}</h1>-->
+        <ul>
+            {% for user in [result] %}
+            <li>
+                <a href="{{ result }}">
+                    {{ result }}
+                </a><br/>
+                <!-- <span class="user"></span><span class="message"></span> -->
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <!-- здесь будут появляться входящие сообщения -->
+    <div id="messages">
+        <ul>
+            <li class="message" style="display: none">
+                <span class="symbol"></span><span class="value"></span>
+                <span class="time"></span>
+            </li>
+        </ul>
+
+    </div>
+        <script>
+        var ws = new WebSocket("ws://" + location.hostname + ":8080/events");
+        //var ws = new WebSocket("ws://" + location.hostname + ":8765/events");
+        //var ws = new WebSocket("ws://" + location.hostname + ":5050/events");
+        //var ws = new WebSocket('wss://wss://echo.websocket.org');
+        //ws.onclose=function(){
+        //    alert('The websocket just closed, readyState: ' + ws.readyState);
+        //}
+
+        //var messages = document.getElementById('messages');
+        //var message = document.rem('ul');
+        var messages = document.getElementById('messages');
+        var message = document.createElement('ul');
+        message.className= "event";
+        messages.appendChild(message);
+        ws.onmessage = function(event) {
+            var messages = document.querySelector("div#messages ul.event")
+            var messag = document.createElement('li')
+            messag.className= "message";
+
+            var messa = document.createElement('span');
+            messa.className= "symbol";
+            messag.appendChild(messa)
+            var mess = document.createElement('span');
+            mess.className= "value";
+            messag.appendChild(mess)
+
+            var content = document.createTextNode(event.data)
+            console.log('content:', content);
+            console.log('content[1]', content[1]);
+
+            document.getElementsByClassName('value').textContent = content[1];
+            console.log('span:', mess);
+
+            messag.appendChild(content)
+            messages.appendChild(messag)
+        };
+        function sendMessage(event) {
+            var ul = document.querySelectorAll('#messages ul');
+            console.log('ul:', ul);
+            this.parentNode.removeChild(ul);
+
+            var input = document.getElementById("messageText")
+            ws.send(input.value)
+            input.value = ''
+            event.preventDefault()
+        }
+        </script>
+    <!--
+    -->
+</div>
+
+
+</body>
+</html>

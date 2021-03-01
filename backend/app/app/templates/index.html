@@ -1,0 +1,65 @@
+<!--###########################################################################
+  # Copyright (c) 2021. Projects from AndreyM                                 #
+  # The best encoder in the world!                                            #
+  # email: muraig@ya.ru                                                       #
+  ###########################################################################-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+    <!--
+    <script src="static/js/au.js" type="text/javascript"></script>
+       -->
+    <!--
+    <script src="static/js/index.js" type="text/javascript"></script>
+    <script src="static/js/bocadillo.js" type="text/javascript"></script> -->
+    <script src="static/js/ws.js" type="text/javascript"></script>
+
+</head>
+<body>
+<!--
+<h1>WebSocket Chat</h1>
+        <form action="" onsubmit="sendMessage(event)">
+            <input type="text" id="messageText" autocomplete="off"/>
+            <button>Send</button>
+        </form>
+        <ul id='messages'>
+        </ul> -->
+<!-- форма для отправки сообщений -->
+<!-- <form name="publish">
+    <input name="message" type="text">
+    <input type="submit" value="Отправить">
+</form> -->
+
+<!-- здесь будут появляться входящие сообщения -->
+<div id="subscribe"></div>
+
+<h2>WebSocket Test</h2>
+
+<div id="messages">
+    <ul class="event">
+    </ul>
+</div>
+<div id="chart"></div>
+<!--
+<script>
+    //var ws = new WebSocket("ws://192.168.7.249:8088/ari/events?api_key=pbxuser:e07026d612c56a4ec8f62273ed366e48&app=channel-playback", ["json"]);
+    var ws = new WebSocket("ws://" + location.host + ":5050/events");
+    ws.onmessage = function(event) {
+        var messages = document.getElementById('messages')
+        var message = document.createElement('li')
+        var content = document.createTextNode(event.data)
+        message.appendChild(content)
+        messages.appendChild(message)
+    };
+    function sendMessage(event) {
+        var input = document.getElementById("messageText")
+        ws.send(input.value)
+        input.value = ''
+        event.preventDefault()
+    }
+</script>
+-->
+</body>
+</html>

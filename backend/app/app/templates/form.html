@@ -1,0 +1,144 @@
+<!--
+  ~ Copyright (c) 2021.
+  ~ Projects from AndreyM
+  ~ The best encoder in the world!
+  ~ email: muraig@ya.ru
+  -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Пример использования jQuery функции $.post()</title>
+    <link href="/static/apple.css" rel="stylesheet">
+    <script src = "/static/js/jquery.min.js"></script>
+    <!-- <script>
+      $( document ).ready(function(){
+        $( "form" ).submit(function(){
+          var formData = $( this ).serialize(); // создаем переменную, которая содержит закодированный набор элементов формы в виде строки
+
+          $.post( "/form/4003?", formData, function( data ) { //  передаем и загружаем данные с сервера с помощью HTTP запроса методом POST
+            $( "div" ).html( data ); // вставляем в элемент <div> данные, полученные от сервера
+          })
+        });
+      });
+    </script> -->
+</head>
+<body>
+<form method = "post">
+    <input list="typeauto"  name="typeauto" placeholder="ТипОбзвона" required type="text"/>
+    <datalist id="typeauto">
+        <option>urliz</option>
+        <option>fizliz</option>
+        <option>fizlizcourt</option>
+        <option>summer</option>
+        <option>handover_start</option>
+        <option>handover_end</option>
+    </datalist>
+    <input type="submit" value="ЗаказатьОбзвон">
+</form>
+<div></div>
+
+<h1>WebSocket Chat</h1>
+<script>
+    /*
+    var myform = document.createElement("form#appl_id");
+    myform.action = "";
+    myform.method = "post";
+
+    product = document.createElement("input");
+    product.value = "value";
+    product.name = "name";
+
+    myform.appendChild(product);
+    myform.submit();
+    */
+    function fun() {
+        /*Getting the number of text fields*/
+        var no = document.getElementById("idname").value;
+        /*Generating text fields dynamically in the same form itself*/
+        for(var i=0;i<no;i++) {
+            var textfield = document.createElement("input");
+            textfield.type = "text";
+            textfield.value = "";
+            document.getElementById('form').appendChild(textfield);
+        }
+    }
+</script>
+<form id="form">
+    <input id="idname" oninput="fun()" type="type" value="">
+</form>
+<!--
+<form action="" onsubmit="sendMessage(event)" id="appl_id">
+    <input autocomplete="off" type="text"/>
+    <button>Send</button>
+</form>
+-->
+<div class="bordered" id="channel" style="">
+    <div class="bordered" id="descr">
+        <ul>
+            {% for user in result.split(';') %}
+            <li>
+                <a href="{{ user.url }}">
+                    {{ user.replace("'",'"').replace(',',':')[1:-1] }}
+                </a><br/>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <!-- здесь будут появляться входящие сообщения -->
+    <div id="messages">
+        <ul>
+            <li class="message" style="display: none">
+                <span class="symbol"></span><span class="value"></span>
+                <span class="time"></span>
+            </li>
+        </ul>
+
+    </div>
+</div>
+
+<script>
+    var ws = new WebSocket("ws://" + location.hostname + ":8080/events");
+    //var ws = new WebSocket("ws://" + location.hostname + ":8765/events");
+    var messages = document.getElementById('messages');
+    var message = document.createElement('ul');
+    message.className= "event";
+    messages.appendChild(message);
+    ws.onmessage = function(event) {
+        var messages = document.querySelector("div#messages ul.event")
+        var messag = document.createElement('li')
+        messag.className= "message";
+
+        var messa = document.createElement('span');
+        messa.className= "symbol";
+        messag.appendChild(messa)
+        var mess = document.createElement('span');
+        mess.className= "value";
+        messag.appendChild(mess)
+
+        //
+        console.log('li:', messag);
+
+        var content = document.createTextNode(event.data)
+        //var content = document.createTextNode(event.data.split(','))
+        console.log('content:', content);
+        console.log('content[1]', content[1]);
+        document.getElementsByClassName('value').textContent = content[1];
+        console.log('span:', mess);
+
+        messag.appendChild(content)
+        messages.appendChild(messag)
+    };
+    function sendMessage(event) {
+        var ul = document.querySelectorAll('#messages ul');
+        console.log('ul:', ul);
+        this.parentNode.removeChild(ul);
+
+        var input = document.getElementById("messageText")
+        ws.send(input.value)
+        input.value = ''
+        event.preventDefault()
+    }
+</script>
+
+</body>
+</html>

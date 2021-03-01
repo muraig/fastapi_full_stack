@@ -1,0 +1,45 @@
+<!--
+  ~ Copyright (c) 2021.
+  ~ Projects from AndreyM
+  ~ The best encoder in the world!
+  ~ email: muraig@ya.ru
+  -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Пример использования jQuery функции $.post()</title>
+    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script>
+  $( document ).ready(function(){
+    $( "form" ).submit(function(){
+      var formData = $( this ).serialize(); // создаем переменную, которая содержит закодированный набор элементов формы в виде строки
+
+      $.post( "/form/4003?", formData, function( data ) { //  передаем и загружаем данные с сервера с помощью HTTP запроса методом POST
+        $( "div" ).html( data ); // вставляем в элемент <div> данные, полученные от сервера
+      })
+    });
+  });
+    </script>
+  </head>
+  <body>
+    <form method = "post">
+        <input autofocus list="typeauto" name="num" placeholder="ТипОбзвона" type="text" value="" />
+        <datalist id="typeauto">
+            <option>urliz</option>
+            <option>fizliz</option>
+            <option>fizlizcourt</option>
+            <option>summer</option>
+            <option>handover_start</option>
+            <option>handover_end</option>
+        </datalist>
+        <input type="submit" value="ЗаказатьОбзвон">
+    </form>
+    <div></div>
+    <!--
+        <input type = "text" placeholder = "Имя" name = "firstName" required>
+        <input type = "text" placeholder = "Фамилия" name = "lastName" required>
+        <input type = "submit" value = "Добавить">
+    -->
+
+  </body>
+</html>

@@ -1,0 +1,65 @@
+<!--###########################################################################
+  # Copyright (c) 2021. Projects from AndreyM                                 #
+  # The best encoder in the world!                                            #
+  # email: muraig@ya.ru                                                       #
+  ###########################################################################-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+</head>
+<body>
+<h1>WebSocket Chat</h1>
+<form action="" onsubmit="sendMessage(event)">
+    <input autocomplete="off" id="messageText" type="text"/>
+    <button>Send</button>
+</form>
+
+<!-- здесь будут появляться входящие сообщения -->
+<div id="messages"></div>
+
+<script>
+    var ws = new WebSocket("ws://" + location.hostname + ":5050/events");
+    //var ws = new WebSocket("ws://" + location.host + "/listws");
+    //var ws = new WebSocket("ws://192.168.1.97:8000/ws");
+    //var ws = new WebSocket("ws://127.0.0.1:8000/ws");
+    //var messages = document.getElementById('messages');
+    //var message = document.rem('ul');
+
+
+    var messages = document.getElementById('messages');
+    var message = document.createElement('ul');
+    message.className= "event";
+    messages.appendChild(message);
+
+
+    ws.onmessage = function(event) {
+        var messages = document.querySelector("div#messages ul.event")
+        var messag = document.createElement('li')
+        messag.className= "lsname";
+        var content = document.createTextNode(event.data)
+        messag.appendChild(content)
+        messages.appendChild(messag)
+    };
+
+    function sendMessage(event) {
+        var ul = document.querySelectorAll('#messages ul');
+        console.log('ul:', ul);
+        this.parentNode.removeChild(ul);
+
+        var input = document.getElementById("messageText")
+        ws.send(input.value)
+        input.value = ''
+        event.preventDefault()
+    }
+
+
+
+
+
+
+</script>
+
+</body>
+</html>
