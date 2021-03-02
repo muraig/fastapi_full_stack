@@ -26,64 +26,23 @@ from starlette.routing import WebSocketRoute
 from broadcaster import Broadcast
 from fastapi.staticfiles import StaticFiles
 ############################################################
-'''
-from aiologger import Logger
 from app.config.custom_logging import CustomizeLogger
 from pathlib import Path as Paths
 
-logger = Logger.with_default_handlers(name='autodial')
-#logger = logging.getLogger(__name__)
-#config_path = Paths(__file__).with_name("logging_config.json")
+import uvicorn
+from motor.motor_asyncio import AsyncIOMotorClient
+# from config import settings
+from app.config.config import Settings
 
-log_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 0)[0] + '/config/'
-config_path = log_root + "logging_config.json"
+from apps.todo.routers import router as todo_router
+
+env_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 2)[0] + os.sep
+env = Paths(__file__).parent.parent.joinpath('.env')
+# env = env_root + '.env'
+# print(f"env: {env}") ; import sys ; sys.exit()
+
+config_path = Paths(__file__).parent.joinpath('config').joinpath("logging_config.json")
 logger = CustomizeLogger.make_logger(config_path)
-'''
-'''
-import logging
-
-logging.basicConfig(level=logging.DEBUG, filename='autodial.log', format='%(asctime)s %(name)s %(levelname)s:%(message)s')
-logger = logging.getLogger(__name__)
-'''
-'''
-import logging.config
-
-log_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)[0] + os.sep
-# print(f"log_root: {log_root}") ; import sys ; sys.exit()
-logging.config.fileConfig(log_root + 'logging.ini', disable_existing_loggers=False)
-logger = logging.getLogger(__name__)
-
-'''
-'''
-import logging.config
-from pythonjsonlogger import jsonlogger
-log_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)[0] + os.sep
-logging.config.fileConfig(log_root + 'json_logging.ini', disable_existing_loggers=False)
-#print(f"{__name__}: {log_root + 'json_logging.ini'}") ; import sys ; sys.exit()
-logger = logging.getLogger(__name__)
-'''
-'''
-import logging
-from aiologger.loggers.json import JsonLogger
-from aiologger.utils import CallableWrapper
-from aiologger.handlers.files import AsyncFileHandler
-from tempfile import NamedTemporaryFile
-
-log_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)[0] + '/log/'
-logger = JsonLogger.with_default_handlers(level=logging.DEBUG, flatten=True)
-#temp_file = NamedTemporaryFile(errors=, buffering=1, encoding='utf8')
-temp_file = NamedTemporaryFile(dir=log_root, )
-# print(f"temp_file.name: {temp_file.name}") ; import sys ; sys.exit()
-handler = AsyncFileHandler(filename=temp_file.name)
-'''
-
-import sys
-import logging
-from aiologger.loggers.json import JsonLogger
-from aiologger.handlers.streams import AsyncStreamHandler
-
-logger = JsonLogger.with_default_handlers(level=logging.DEBUG, flatten=True)
-# handler = AsyncStreamHandler(stream=sys.stdout)
 
 class Publish(BaseModel):
     """
@@ -159,17 +118,19 @@ add_path = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 0)[0]
 os.chdir(add_path)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+midlew = [str(origin) for origin in settings.BACKEND_CORS_ORIGINS] ,\
+         'http://192.168.1.97', 'http://127.0.0.1:8080', 'http://localhost:3000'
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
 
-
+# logger.info(f"app.middleware(): {midlew}")
 @app.post("/auto/push")
 async def push_message(publish: Publish):
     """
@@ -189,9 +150,40 @@ async def ping_pong(msg: str):
     """
     # return {"ping": "pong"}
     # return jsonify('pong!')
-    await logger.info(f"ping: {msg}")
+    logger.info(f"ping: {msg}")
     return {msg: "pong!"}
 
+
+########### from todo ######################
+#app = FastAPI()
+
+
+@app.on_event("startup")
+async def startup_db_client():
+    # Settings(_env_file=self.env, _env_file_encoding='utf-8').DATAFILE
+    config = Settings(_env_file=env, _env_file_encoding='utf-8')
+    # print(f"DB_URL: {config.DB_URL}")
+    # print(f"DB_NAME: {config.DB_NAME}")
+    app.mongodb_client = AsyncIOMotorClient(config.DB_URL)
+    app.mongodb = app.mongodb_client[config.DB_NAME]
+
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    app.mongodb_client.close()
+
+
+app.include_router(todo_router, tags=["tasks"], prefix="/task")
+
+'''
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host=settings.HOST,
+        reload=settings.DEBUG_MODE,
+        port=settings.PORT,
+    )
+'''
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(fastapi_auto_dial.auto_router)
@@ -221,6 +213,7 @@ app.include_router(api_router, dependencies=[Depends(check_auth_middleware)])
 
 if __name__ == '__main__':
     with suppress(KeyboardInterrupt):
-        uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True, log_level="info", debug=True)
+        #uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True, log_level="info", debug=True)
+        uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_level="info", debug=True)
 
 '/usr/local/bin/python /usr/local/bin/uvicorn --reload --host 0.0.0.0 --port 80 --log-level info app.main:app'

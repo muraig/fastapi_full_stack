@@ -1,8 +1,17 @@
+# -*- coding: utf-8 -*-
+"""
+Программа для осуществлении воспроизведения звукоых файлов клиентам телефонной сети
+"""
+# ##############################################################################
+#  Copyright (c) 2021. Projects from AndreyM                                   #
+#  The best encoder in the world!                                              #
+#  email: muraig@ya.ru                                                         #
+# ##############################################################################
 from typing import Generator
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt
+import jwt
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 

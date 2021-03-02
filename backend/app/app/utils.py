@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+Программа для осуществлении воспроизведения звукоых файлов клиентам телефонной сети
+"""
+# ##############################################################################
+#  Copyright (c) 2021. Projects from AndreyM                                   #
+#  The best encoder in the world!                                              #
+#  email: muraig@ya.ru                                                         #
+# ##############################################################################
+
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -6,7 +16,8 @@ from typing import Any, Dict, Optional
 import emails
 from emails.template import JinjaTemplate
 from jose import jwt
-
+# install PyJWT
+# import jwt
 from app.core.config import settings
 
 

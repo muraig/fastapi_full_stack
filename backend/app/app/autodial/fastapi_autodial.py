@@ -24,68 +24,24 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import Response
 from pydantic import BaseModel
 
-from app.autodial.autodial_apps import check_applications, ARIApp
+from app.autodial.autodial_apps import check_applications
+#, ARIApp
 from app.autodial.autodial_apps import create_and_maintain_channel
 
-'''
-from aiologger import Logger
 from app.config.custom_logging import CustomizeLogger
 from pathlib import Path as Paths
 
-logger = Logger.with_default_handlers(name='autodial')
-#logger = logging.getLogger(__name__)
-#config_path = Paths(__file__).with_name("logging_config.json")
+from typing import List
 
-log_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)[0] + '/config/'
-config_path = log_root + "logging_config.json"
+from fastapi import FastAPI, WebSocket
+#, WebSocketDisconnect
+from fastapi.websockets import WebSocketDisconnect
+from fastapi.responses import HTMLResponse
+# from fastapi.middleware.cors import CORSMiddleware
+
+
+config_path = Paths(__file__).parent.parent.joinpath('config').joinpath("logging_config.json")
 logger = CustomizeLogger.make_logger(config_path)
-'''
-'''
-import logging
-
-logging.basicConfig(level=logging.DEBUG, filename='autodial.log', format='%(asctime)s %(name)s %(levelname)s:%(message)s')
-logger = logging.getLogger(__name__)
-'''
-
-'''
-import logging.config
-
-log_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 2)[0] + os.sep
-# print(f"log_root: {log_root}") ; import sys ; sys.exit()
-logging.config.fileConfig(log_root + 'logging.ini', disable_existing_loggers=False)
-logger = logging.getLogger(__name__)
-'''
-
-'''
-import logging.config
-from pythonjsonlogger import jsonlogger
-log_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 2)[0] + os.sep
-logging.config.fileConfig(log_root + 'json_logging.ini', disable_existing_loggers=False)
-#print(f"{__name__}: {log_root + 'json_logging.ini'}") ; import sys ; sys.exit()
-logger = logging.getLogger(__name__)
-'''
-'''
-import logging
-from aiologger.loggers.json import JsonLogger
-from aiologger.utils import CallableWrapper
-from aiologger.handlers.files import AsyncFileHandler
-from tempfile import NamedTemporaryFile
-
-log_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 2)[0] + '/log/'
-logger = JsonLogger.with_default_handlers(level=logging.DEBUG, flatten=True)
-#temp_file = NamedTemporaryFile(errors=, buffering=1, encoding='utf8')
-temp_file = NamedTemporaryFile(dir=log_root, )
-# print(f"temp_file.name: {temp_file.name}") ; import sys ; sys.exit()
-handler = AsyncFileHandler(filename=temp_file.name)
-'''
-
-import sys
-import logging
-from aiologger.loggers.json import JsonLogger
-from aiologger.handlers.streams import AsyncStreamHandler
-
-logger = JsonLogger.with_default_handlers(level=logging.DEBUG, flatten=True)
-# handler = AsyncStreamHandler(stream=sys.stdout)
 
 FILENAME = "/home/andrei/PycharmProjects/web_realtime_streaming/other/some_other_file.tsv"
 env_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 2)[0] + os.sep
@@ -141,9 +97,7 @@ async def form_post(request: Request, phone: int = Form(...)):
     # print(f"read_phones::result: {result.to_dict}")
     # print(f"read_phones::result: {(result.id, result.connected.number)}")
     logger.info(f"read_phones::result: {(result.id, result.connected.number)}")
-    '''else:
-        # print(f"read_phones::phone: {phone}")
-        logger.info(f"read_phones::phone: {phone}")'''
+
     return templates.TemplateResponse('phone.html', context={'request': request, 'result': result})
 
 
@@ -186,13 +140,24 @@ class model500(BaseModel):
 @auto_router.post("/auto/form", responses={200: {"response": model200}, 404: {"response": model404}, 500: {"response": model500}})
 async def form_post_post(request: Request, typeauto: str = Form(...)):
     """
-
+    сделал запуск форком. теперь нужно отследить процесс для управления
+    # TODO: сделал запуск форком. теперь нужно отследить процесс для управления
     :param request:
     :param typeauto:
     :return:
     """
     # id: str = Form(...), name: str = Form(...)
     #print(f"\nform_post::req: {typeauto}\n")
+
+    from autodial_fork import get_date
+    date = asyncio.run_coroutine_threadsafe(get_date(typeauto), loop=asyncio.get_running_loop())
+    # print(f"Current date: {date}")
+    logger.info(f"Current date: {date}")
+    #date = asyncio.run(get_date())
+    # выводим результат работы
+    #print(f"Current date: {date}")
+
+    await asyncio.sleep(0.1)
     req_text = await check_applications(env)
     # logger.info(f"form_get_post::req_text: {len(req_text[1])}")
     try:
@@ -205,17 +170,9 @@ async def form_post_post(request: Request, typeauto: str = Form(...)):
         # print(f"{e}")
         logger.info(f"Exception: {e}")
 
-        from autodial_fork import main
-        # date = asyncio.run(get_date(typeauto))
-        await logger.info(f"Current date: {typeauto}")
-        # date = asyncio.run(main(typeauto))
-        # date = await main(typeauto)
-        asyncio.run_coroutine_threadsafe(main(typeauto), loop=asyncio.get_running_loop())
-        # print(f"Current date: {date}")
-        # await logger.info(f"Current date: {date}")
     finally:
         await asyncio.sleep(0.1)
-        await logger.info(f"Current date: {'Ok!'}")
+        logger.info(f"Current date: {'Ok!'}")
 
     return templates.TemplateResponse('form.html', context={'request': request, 'result': rq})
 
@@ -273,3 +230,49 @@ async def release(*,
         return Response(status_code=res.status_code)
     return Response(status_code=status.HTTP_200_OK)
 '''
+
+########## chat ##########################
+messages = []  # List of chat messages
+
+# Class for connecting the client with the webSocket
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message):
+        for connection in self.active_connections:
+            await connection.send_json(message)
+
+
+manager = ConnectionManager()  # instance of the Connection Manager
+
+# websocket for publish the comming message to all client connected in
+@auto_router.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    await manager.connect(websocket)  # connecting the client with the websocket
+    try:
+        while True:
+            data = await websocket.receive_json()  # Data recieve when the client send a message
+            messages.append(data)  # Add the coming message to the list of messages
+
+            """ here we call a ConnectionManager method named "broadcast()" that publish the list of messages to
+            all clients """
+            await manager.broadcast(messages)
+
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)  # deconnecting if an exeption handled
+        # await manager.broadcast(messages)
+
+'''
+'''
+

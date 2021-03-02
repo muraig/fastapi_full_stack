@@ -1,7 +1,20 @@
+# -*- coding: utf-8 -*-
+"""
+Программа для осуществлении воспроизведения звукоых файлов клиентам телефонной сети
+"""
+# ##############################################################################
+#  Copyright (c) 2021. Projects from AndreyM                                   #
+#  The best encoder in the world!                                              #
+#  email: muraig@ya.ru                                                         #
+# ##############################################################################
+
 from datetime import datetime, timedelta
 from typing import Any, Union
 
 from jose import jwt
+# install PyJWT
+#import jwt
+#from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
 from app.core.config import settings

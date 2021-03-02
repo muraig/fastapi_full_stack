@@ -32,6 +32,11 @@ import voicegen as vc
 from app.config.custom_logging import CustomizeLogger
 from pathlib import Path as Paths
 
+
+config_path = Paths(__file__).parent.parent.joinpath('config').joinpath("logging_config.json")
+logger = CustomizeLogger.make_logger(config_path)
+
+
 # logger = Logger.with_default_handlers(name='autodial')
 # logger = logging.getLogger(__name__)
 # config_path = Paths(__file__).with_name("logging_config.json")
@@ -56,16 +61,6 @@ env = env_root + '.env'
 # print(f"env: {env}") ; import sys ; sys.exit()
 FILENAME = env_root + "_filecsv.csv"
 
-config_path = Paths(__file__).parent.parent.joinpath('config').joinpath("logging_config.json")
-logger = CustomizeLogger.make_logger(config_path)
-
-'''
-import logging.config
-
-log_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 0)[0] + os.sep
-logging.config.fileConfig(fname=log_root + 'logging.conf',
-                          disable_existing_loggers=False)  # , defaults={'logfilename': 'autodial.log'})
-'''
 endpoint = ''
 
 
@@ -95,11 +90,13 @@ async def create_and_maintain_channel(typeautodial, _phone, _channel_id):
         api_instance = swagger_client.ChannelsApi(swagger_client.ApiClient(configuration))
         if len(str(_phone)) <= 4:
             # print(f"create_channels_with_id::len(phone): {_phone} = {len(str(_phone))}")
-            logger.info(f"create_channels_with_id::len(phone): {_phone} = {len(str(_phone))}")
+            logger.info(f"|Длинна номера: {_phone}| = {len(str(_phone))}")
             endpoint = 'PJSIP/'
         elif len(str(_phone)) == 10:
+            logger.info(f"|Длинна номера: {_phone}| = {len(str(_phone))}")
             endpoint = 'IAX2/Aster4_Aster1/'
         elif len(str(_phone)) == 11:
+            logger.info(f"|Длинна номера: {_phone}| = {len(str(_phone))}")
             endpoint = 'IAX2/Aster4_Aster1/'
 
         endpoint += str(_phone)
@@ -880,13 +877,15 @@ class ARIApp(object):
         # print(f"self.ppid: {self.ppid}")
         logger.info(f"self.ppid: {self.ppid}")
         # print(f"run_file = '/var/run/user/1000/asuncio_autodial.pid'")
-        logger.info(f"run_file = '/var/run/user/1000/asuncio_autodial.pid'")
+        #logger.info(f"run_file = '/var/run/user/1000/asuncio_autodial.pid'")
+
 
     async def connect(self, data):
         """
 
         :rtype: object
         """
+        logger.info(f"data: {data}")
         async with websockets.connect(self.url) as websocket:
             """ Создание подключения к Астериску """
             # print(f"Connected..{data}")            # print(f"self.pathf: {str(self.pathf)}")

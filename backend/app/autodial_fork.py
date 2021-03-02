@@ -12,22 +12,45 @@ import os
 from contextlib import suppress
 import asyncio
 import sys
+from app.config.custom_logging import CustomizeLogger
+from pathlib import Path as Paths
 
+
+config_path = Paths(__file__).parent.joinpath('app').joinpath('config').joinpath("logging_config.json")
+logger = CustomizeLogger.make_logger(config_path)
+'''
+import sys
+import logging
+from aiologger.loggers.json import JsonLogger
+from aiologger.handlers.streams import AsyncStreamHandler
+
+logger = JsonLogger.with_default_handlers(level=logging.DEBUG, flatten=True)
+# handler = AsyncStreamHandler(stream=sys.stdout)
+'''
+
+'''
 async def async_function(typeauto):
-    from app.autodial.autodial_apps import check_applications, ARIApp
+    from app.autodial.autodial_apps import ARIApp
     # more async stuff...
-    # FILENAME = "/home/andrei/PycharmProjects/web_realtime_streaming/other/some_other_file.tsv"
     env_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)[0] + '/app/'
     env = env_root + '.env'
+    logger.info(f"env: {env}")
     # print(f"env: {env}") ; import sys ; sys.exit()
-
     await ARIApp(env).connect(typeauto)
+'''
 
 async def get_date(typeauto=None):
     # строка с кодом, которую будем выполнять,
     # ее можно заменить любой командой
-    code = 'import datetime; print(datetime.datetime.now())'
-    code = await async_function(typeauto)
+    # code = 'import datetime; print(datetime.datetime.now())'
+    #code = await async_function(typeauto)
+    from app.autodial.autodial_apps import ARIApp
+    # more async stuff...
+    env_root = os.path.abspath(os.path.dirname(__file__)).rsplit('/', 1)[0] + '/app/'
+    env = env_root + '.env'
+    logger.info(f"env: {env}")
+    # print(f"env: {env}") ; import sys ; sys.exit()
+    code = await ARIApp(env).connect(typeauto)
 
     # Создаем подпроцесс и перенаправляем
     # стандартный вывод в канал `PIPE`.
@@ -42,22 +65,29 @@ async def get_date(typeauto=None):
     # Ждем когда субпроцесс завершиться.
     await proc.wait()
     # возвращаем прочитанную строку
-    #return line
-    return 200
+    return line
 
+
+if __name__ == '__main__':
+    date = asyncio.run(get_date())
+    # выводим результат работы
+    print(f"Current date: {date}")
+
+'''
 async def main(typeauto=None):
     # date = asyncio.run(get_date(typeauto))
     date = await get_date(typeauto)
     # выводим результат работы
-    print(f"Current date: {date}")
+    # print(f"Current date: {date}")
+    logger.info(f"выводим результат работы: {date}")
     return 200
+'''
 
-
+'''
 if __name__ == '__main__':
     with suppress(KeyboardInterrupt):
         main(typeauto=None)
-
-
+'''
 # Current date: 2021-01-19 09:57:24.047066
 
 '''
